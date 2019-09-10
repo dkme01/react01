@@ -3,7 +3,7 @@ import { FaGithubAlt, FaPlus, FaSpinner } from 'react-icons/fa';
 
 import api from '../../services/axios';
 
-import { Container, Form, SubmitButton } from './styles';
+import { Container, Form, SubmitButton, List } from './styles';
 
 export default class Main extends Component {
   state = {
@@ -11,6 +11,24 @@ export default class Main extends Component {
     repositories: [],
     loading: false,
   };
+
+  // Carregar os dados do localStorage
+  componentDidMount() {
+    const repositories = localStorage.getItem('repositories');
+
+    if (repositories) {
+      this.setState({ repositories: JSON.parse(repositories) });
+    }
+  }
+
+  // Salvar os dados do localStorage
+  componentDidUpdate(_, prevState) {
+    const { repositories } = this.state;
+
+    if (prevState.repositories !== this.state.repositories) {
+      localStorage.setItem('repositories', JSON.stringify(repositories));
+    }
+  }
 
   handleImputChange = e => {
     this.setState({ newRepo: e.target.value });
@@ -37,7 +55,7 @@ export default class Main extends Component {
   };
 
   render() {
-    const { newRepo, loading } = this.state;
+    const { newRepo, loading, repositories } = this.state;
 
     return (
       <Container>
@@ -45,6 +63,7 @@ export default class Main extends Component {
           <FaGithubAlt />
           Repositórios
         </h1>
+
         <Form onSubmit={this.handleSubmit}>
           <input
             type="text"
@@ -52,6 +71,7 @@ export default class Main extends Component {
             value={newRepo}
             onChange={this.handleImputChange}
           />
+
           <SubmitButton loading={loading}>
             {loading ? (
               <FaSpinner color="#FFF" size={14} />
@@ -60,6 +80,15 @@ export default class Main extends Component {
             )}
           </SubmitButton>
         </Form>
+
+        <List>
+          {repositories.map(repository => (
+            <li key={repository.name}>
+              <span>{repository.name}</span>
+              <a href="">Detalhes</a>
+            </li>
+          ))}
+        </List>
       </Container>
     );
   }
